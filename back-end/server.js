@@ -8,6 +8,9 @@ const PORT = process.env.PORT || 3001;
 let { pathname } = new URL('./user-info.json', import.meta.url);
 fs.file(pathname);
 
+if (!fs.exists(pathname)) {
+    fs.write(pathname, {});
+}
 
 let counter = fs.read(pathname, 'json');
 
@@ -38,16 +41,13 @@ app.get('/visit', (req, res) => {
 });
 
 app.get('/visited', (req, res) => {
-    let trackingInfo = '';
+    const { site } = req.query;
 
-    for (const [site, visits] of Object.entries(counter)) {
-        trackingInfo += `Website: ${site}, Besuche: ${visits}\n`;
+    if (!site) {
+        return res.send(counter);
     }
 
-    if (trackingInfo === '') {
-        trackingInfo = "Keine Website-Besuche verzeichnet.";
-    }
-    res.send(trackingInfo);
+    res.send(`${counter[site]}`);
 })
 
 app.listen(PORT, () => {
